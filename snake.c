@@ -9,7 +9,7 @@
 // Alto de los leds
 #define H LED_MATRIX_0_HEIGHT
 // Lista circular
-#define L 10000
+#define L (W*H)
 
 // Pointer to leds
 volatile unsigned int *led_base = LED_MATRIX_0_BASE;
@@ -21,7 +21,7 @@ volatile unsigned int *d_pad_ri = D_PAD_0_RIGHT;
 
 volatile unsigned int *head;
 volatile unsigned int *tail;
-volatile unsigned int *snake[10000];
+volatile unsigned int *snake[L];
 int headindx = 0;
 int tailindx = 0;
 
@@ -72,6 +72,8 @@ void snakeGame()
     {
         // Make some delay
         int a = 0;
+        headindx = headindx%L;
+        tailindx = tailindx%L;
         for (int i = 0; i < 30000; i++)
         {
             a = i;
@@ -130,40 +132,38 @@ int moveSnake(int offset, int direction) {
                 *(head + offset) = 0x00F00F;
                 snake[(headindx + 1) % L] = head + offset;
                 head = head + offset;
-                *snake[(tailindx) % L] = 0x00;
-                snake[(tailindx) % L] = NULL;
+                *snake[tailindx] = 0x00;
+                snake[tailindx] = NULL;
                 tail = snake[(tailindx + 1) % L];
                 headindx++;
                 tailindx++;
             }
             return 1;
         } else {
-            printf("NOPE %X : %X\n", *(head + offset), head + offset);
+            printf("PERDISTEEEEEEEEEEE");
             return 0;
         }
     }
     // Vertical - Y axis
     else {
-        printf("MOVE 1\n");
         // Not on a border or collision with the snake
         if (*(head + (offset * W)) != 0xFF0000 && *(head + (offset * W)) != 0x00F00F) {
             // Eat a fruit
             if (*(head + (offset * W)) == 0xF000F0) {
                 eatApple(head + (offset * W));
             } else {
-                printf("MOVE 3 %X\n", head + offset);
                 *(head + (offset * W)) = 0x00F00F;
                 snake[(headindx + 1) % L] = head + (offset * W);
                 head = head + (offset * W);
-                *snake[(tailindx) % L] = 0x00;
-                snake[(tailindx) % L] = NULL;
+                *snake[tailindx] = 0x00;
+                snake[tailindx] = NULL;
                 tail = snake[(tailindx + 1) % L];
                 headindx++;
                 tailindx++;
             }
             return 1;
         } else {
-            printf("NOPE %X : %X\n", *(head + offset), head + offset);
+            printf("PERDISTEEEEEEEEEEE");
             return 0;
         }
     }
@@ -173,7 +173,7 @@ int moveSnake(int offset, int direction) {
 // Adds a new part to the snake
 int eatApple(volatile unsigned int *cord)
 {
-    printf("Sanake score = %d \n", snake_score);
+    // printf("Sanake score = %d \n", snake_score);
 
     snake[headindx + 1] = cord;
     head = cord;
@@ -194,17 +194,20 @@ int addApple()
     int x = rand() % (W - 2) + 1; // Evita los bordes
     int y = rand() % (H - 2) + 1;
 
-    // Verifica si la posici�n est� ocupada por la serpiente
-    while (*(led_base + (W * y) + x) == 0x00FF00)
+    // Verifica si la posici?n est? ocupada por la serpiente
+    while (*(led_base + (W * y) + x) != 0x000000)
     {
         x = rand() % (W - 2) + 1;
         y = rand() % (H - 2) + 1;
     }
 
     // Coloca la manzana en el tablero
-    *(led_base + (W * y) + x) = 0xF000F0;
+    if(*(led_base + (W * y) + x) != 0x00FF00 && *(led_base + (W * y) + x) != 0xFF0000){
+        printf("NEW APPLE %X\n", *(led_base + (W * y) + x));
+        *(led_base + (W * y) + x) = 0xF000F0;
 
-    return 1; // Indica que se gener� una manzana
+    }
+    return 1; // Indica que se gener? una manzana
 }
 
 void drawBorders()
