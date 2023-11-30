@@ -45,7 +45,7 @@ int main()
 
 // Functions
 void snakeInit()
-{
+{   // Start game with 2 snake parts
     snake[0] = led_base + 1 + W;
     snake[1] = led_base + 2 + W;
 
@@ -54,7 +54,7 @@ void snakeInit()
 
     *snake[0] = 0x00FF00;
     *snake[1] = 0x00FF00;
-
+    
     headindx++;
 
     addApple();
@@ -109,6 +109,7 @@ void snakeGame()
         // End the game
         else if (game == 0)
         {
+            printf("You lost :(\n\tScore:  %d)", snake_score);
             break;
         }
         else
@@ -121,14 +122,12 @@ void snakeGame()
 int moveSnake(int offset, int direction) {
     // Horizontal - X axis
     if (direction == 0) {
-        printf("MOVE 1\n");
         // Not on a border or collision with the snake
         if (*(head + offset) != 0xFF0000 && *(head + offset) != 0x00F00F) {
             // Eat a fruit
             if (*(head + offset) == 0xF000F0) {
                 eatApple(head + offset);
             } else {
-                printf("MOVE 3 %X\n", head + offset);
                 *(head + offset) = 0x00F00F;
                 snake[(headindx + 1) % L] = head + offset;
                 head = head + offset;
@@ -140,7 +139,6 @@ int moveSnake(int offset, int direction) {
             }
             return 1;
         } else {
-            printf("PERDISTEEEEEEEEEEE");
             return 0;
         }
     }
@@ -163,7 +161,6 @@ int moveSnake(int offset, int direction) {
             }
             return 1;
         } else {
-            printf("PERDISTEEEEEEEEEEE");
             return 0;
         }
     }
@@ -181,7 +178,6 @@ int eatApple(volatile unsigned int *cord)
     *snake[headindx] = 0x00FF00;
 
     snake_score++; // Aumentamos score
-    printf("Sanake score = %d \n", snake_score);
 
     return addApple();
 }
